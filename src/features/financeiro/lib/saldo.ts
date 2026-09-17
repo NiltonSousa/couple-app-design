@@ -22,15 +22,33 @@ export interface Saldo {
  * - Only `status: 'pendente'` items count — settling an item removes it
  *   from the balance immediately.
  *
- * TODO(user): implement the aggregation loop below.
- *
- * Suggested approach: keep a running signed total (e.g. positive = Nilton
- * owes Damaris, negative = Damaris owes Nilton), walk `gastos`, and for each
- * eligible pending item add/subtract the counted amount based on `pagoPor`.
- * At the end, convert the signed total into `{ quemDeve, quemRecebe, valor }`.
+ * Signed running total: positive = Damaris owes Nilton, negative = Nilton
+ * owes Damaris. Each eligible pending item adds its counted amount to the
+ * payer's side (since the payer is owed) and away from the other person.
  */
 export function computeSaldo(gastos: Gasto[]): Saldo {
-  // TODO(user): replace this stub with the real aggregation.
-  void gastos;
-  return { quemDeve: null, quemRecebe: null, valor: 0 };
+  let saldoNilton = 0; // positive = Nilton is owed; negative = Nilton owes
+
+  for (const gasto of gastos) {
+    if (gasto.status !== 'pendente') continue;
+
+    let valorContado: number;
+    if (gasto.divisao === '50-50') {
+      valorContado = gasto.valorTotal / 2;
+    } else if (gasto.divisao === 'emprestimo' && gasto.abaterNoSaldo) {
+      valorContado = gasto.valorTotal;
+    } else {
+      continue;
+    }
+
+    saldoNilton += gasto.pagoPor === 'nilton' ? valorContado : -valorContado;
+  }
+
+  if (saldoNilton === 0) {
+    return { quemDeve: null, quemRecebe: null, valor: 0 };
+  }
+
+  return saldoNilton > 0
+    ? { quemDeve: 'damaris', quemRecebe: 'nilton', valor: saldoNilton }
+    : { quemDeve: 'nilton', quemRecebe: 'damaris', valor: -saldoNilton };
 }
