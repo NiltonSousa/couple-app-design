@@ -70,7 +70,7 @@ export function PainelPage() {
           title="Resumo do casal"
           actions={
             <>
-              <Link to="/saldo" className={styles.pillLink}>
+              <Link to="/historico" className={styles.pillLink}>
                 <Pill tone={saldoTone(saldo)}>{formatSaldoLabel(saldo, labelDe)}</Pill>
               </Link>
               <Link to="/lancar-gasto">
@@ -83,7 +83,7 @@ export function PainelPage() {
     >
       <div className={styles.statsRow}>
         <StatCard label="Total lançado este mês" value={formatCurrency(totalDoMes)} />
-        <Link to="/saldo" className={styles.statLink}>
+        <Link to="/historico" className={styles.statLink}>
           <StatCard
             label="Saldo entre vocês"
             value={formatSaldoLabel(saldo, labelDe)}

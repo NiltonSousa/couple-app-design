@@ -6,18 +6,34 @@ import { SelectField } from '../../../design-system/components/Field';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
 import { formatCurrency } from '../../../shared/lib/currency';
 import { GastoRow } from '../components/GastoRow';
+import { SaldoCard } from '../components/SaldoCard';
 import { useCasal } from '../hooks/useCasal';
 import { useGastos } from '../hooks/useGastos';
+import { useSaldo } from '../hooks/useSaldo';
 import { CATEGORIES, FILTER_ALL } from '../lib/types';
 import type { Category, ExpenseStatus, Person } from '../lib/types';
 import styles from './HistoricoPage.module.css';
 
 export function HistoricoPage() {
   const { status, gastos, error, acaoError, quitar, reabrir, recarregar } = useGastos();
+  const {
+    status: saldoStatus,
+    summary,
+    error: saldoError,
+    recarregar: recarregarSaldo,
+  } = useSaldo();
   const { membros, labelDe } = useCasal();
   const [categoria, setCategoria] = useState<Category | typeof FILTER_ALL>(FILTER_ALL);
   const [pagoPor, setPagoPor] = useState<Person | typeof FILTER_ALL>(FILTER_ALL);
   const [statusFiltro, setStatusFiltro] = useState<ExpenseStatus | typeof FILTER_ALL>(FILTER_ALL);
+
+  // A paydown action (quitar, pagar parcela, pagar parte) changes both which
+  // expenses compose the balance and their status in the list below, so both
+  // sources refetch together.
+  const recarregarTudo = () => {
+    recarregar();
+    recarregarSaldo();
+  };
 
   const filtrados = useMemo(() => {
     return gastos
@@ -32,8 +48,29 @@ export function HistoricoPage() {
     .filter((g) => g.status === 'pending' || g.status === 'partial_paid')
     .reduce((sum, g) => sum + g.totalAmount, 0);
 
+  // quitar/reabrir change the balance too, not just the list — useGastos
+  // already refetches itself, so only the saldo side needs an extra nudge.
+  const quitarEAtualizarSaldo = async (id: string) => {
+    await quitar(id);
+    recarregarSaldo();
+  };
+
+  const reabrirEAtualizarSaldo = async (id: string) => {
+    await reabrir(id);
+    recarregarSaldo();
+  };
+
   return (
     <AppShell topbar={<Topbar eyebrow="EXTRATO" title="Histórico de gastos" />}>
+      {saldoStatus === 'loading' && <LoadingState label="Carregando saldo..." />}
+      {saldoStatus === 'error' && (
+        <ErrorState message={saldoError ?? 'Algo deu errado.'} onRetry={recarregarSaldo} />
+      )}
+      {saldoStatus === 'empty' && <EmptyState>Nenhum lançamento pendente compõe o saldo.</EmptyState>}
+      {saldoStatus === 'ready' && summary && (
+        <SaldoCard summary={summary} onPago={recarregarTudo} />
+      )}
+
       <Card className={styles.filters}>
         <SelectField
           label="Categoria"
@@ -104,8 +141,8 @@ export function HistoricoPage() {
                 key={g.id}
                 gasto={g}
                 labelDe={labelDe}
-                onQuitar={quitar}
-                onReabrir={reabrir}
+                onQuitar={quitarEAtualizarSaldo}
+                onReabrir={reabrirEAtualizarSaldo}
               />
             ))}
             <div className={styles.totalRow}>

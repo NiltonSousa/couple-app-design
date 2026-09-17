@@ -7,7 +7,6 @@ const NAV_ITEMS = [
   { to: '/', label: 'Painel', end: true },
   { to: '/lancar-gasto', label: 'Lançar gasto', end: false },
   { to: '/historico', label: 'Histórico', end: false },
-  { to: '/saldo', label: 'Saldo', end: false },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
