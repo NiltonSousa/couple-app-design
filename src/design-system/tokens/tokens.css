@@ -1,0 +1,46 @@
+/*
+ * Design tokens — mirror the "Nós Dois" Penpot token set
+ * (docs/superpowers/plans/2026-06-30-nos-dois-financeiro-desktop.md).
+ * Keep in sync with that file if the Penpot design changes.
+ */
+:root {
+  /* color */
+  --color-bg: #f4f6f8;
+  --color-surface: #ffffff;
+  --color-fg: #1f2933;
+  --color-muted: #7c8a97;
+  --color-border: #e1e7ec;
+  --color-accent: #2563a8;
+  --color-accent-soft: #e3f0ff;
+  --color-accent-strong: #1e4e82;
+  --color-danger: #c1443a;
+  --color-danger-soft: #fbe7e4;
+  --color-warn: #c98a1f;
+  --color-warn-soft: #fbeed9;
+  --color-warn-strong: #8a6416;
+
+  /* spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 28px;
+  --spacing-xl: 40px;
+
+  /* radius */
+  --radius-sm: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* font size */
+  --fontsize-h1: 28px;
+  --fontsize-h2: 20px;
+  --fontsize-h3: 15px;
+  --fontsize-body: 14px;
+  --fontsize-meta: 12px;
+  --fontsize-stat: 32px;
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* layout */
+  --sidebar-width: 232px;
+}

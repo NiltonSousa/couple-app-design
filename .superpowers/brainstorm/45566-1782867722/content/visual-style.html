@@ -1,0 +1,95 @@
+<h2>Qual direção visual combina mais com o app de vocês?</h2>
+<p class="subtitle">Mesma tela (Painel/Resumo) em 3 estilos diferentes — clique na que mais te agrada</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="tech" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family: 'Segoe UI', system-ui, sans-serif; background:#fafafa; color:#1a1d1f; padding:16px; border-radius:8px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-weight:600; font-size:13px;">Resumo do casal</div>
+          <div style="background:#eafaf0; color:#1f7a4d; padding:3px 10px; border-radius:999px; font-family:monospace; font-size:10px;">Contas quitadas</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <div style="flex:1; background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:10px;">
+            <div style="color:#777; font-size:10px;">Total no mês</div>
+            <div style="font-family:monospace; font-weight:700; font-size:16px;">R$ 2.480</div>
+          </div>
+          <div style="flex:1; background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:10px;">
+            <div style="color:#777; font-size:10px;">Saldo</div>
+            <div style="font-family:monospace; font-weight:700; font-size:16px;">—</div>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:10px;">
+          <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee;"><span>Mercado</span><span style="font-family:monospace;">R$ 180</span></div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>Uber</span><span style="font-family:monospace;">R$ 32</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Tech / Utilitário</h3>
+      <p>Sério, direto, números tabulares, tons neutros. Prioriza clareza e velocidade de leitura — como uma planilha bem feita.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="warm" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family: 'Georgia', serif; background:linear-gradient(160deg,#fff7f0,#fdeee0); color:#3d2b1f; padding:16px; border-radius:14px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-weight:700; font-size:14px;">Vocês dois 💛</div>
+          <div style="background:#ffe3c2; color:#a35a00; padding:4px 12px; border-radius:999px; font-size:10px;">tudo em dia</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+          <div style="flex:1; background:#fffaf5; border-radius:14px; padding:12px; box-shadow:0 2px 8px rgba(180,120,60,0.08);">
+            <div style="color:#a3826b; font-size:10px;">Gasto do mês</div>
+            <div style="font-weight:700; font-size:17px;">R$ 2.480</div>
+          </div>
+          <div style="flex:1; background:#fffaf5; border-radius:14px; padding:12px; box-shadow:0 2px 8px rgba(180,120,60,0.08);">
+            <div style="color:#a3826b; font-size:10px;">Entre vocês</div>
+            <div style="font-weight:700; font-size:17px;">🤝 quites</div>
+          </div>
+        </div>
+        <div style="background:#fffaf5; border-radius:14px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>🛒 Mercado</span><span>R$ 180</span></div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>🚗 Uber</span><span>R$ 32</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Pessoal / Afetivo</h3>
+      <p>Tons quentes, cantos macios, toques de emoji/ilustração. Sensação de "app de vocês dois", não de ferramenta corporativa.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="calm" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family: 'Segoe UI', system-ui, sans-serif; background:#f4f6f8; color:#25303a; padding:16px; border-radius:16px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-weight:600; font-size:13px;">Resumo</div>
+          <div style="background:#e3f0ff; color:#2563a8; padding:4px 12px; border-radius:999px; font-size:10px;">Em dia</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+          <div style="flex:1; background:#fff; border-radius:16px; padding:12px;">
+            <div style="color:#7c8a97; font-size:10px;">Este mês</div>
+            <div style="font-weight:600; font-size:17px; color:#2563a8;">R$ 2.480</div>
+          </div>
+          <div style="flex:1; background:#fff; border-radius:16px; padding:12px;">
+            <div style="color:#7c8a97; font-size:10px;">Saldo</div>
+            <div style="font-weight:600; font-size:17px;">quites</div>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:16px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Mercado</span><span style="color:#2563a8;">R$ 180</span></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Uber</span><span style="color:#2563a8;">R$ 32</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Calmo / Minimalista</h3>
+      <p>Neutro suave com um azul de destaque, cantos bem arredondados, respiro generoso. Meio termo entre sério e afetivo.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;">Pode escolher uma, ou combinar elementos de mais de uma (ex: "gosto da estrutura tech mas com cantos macios") — me diga no terminal.</p>

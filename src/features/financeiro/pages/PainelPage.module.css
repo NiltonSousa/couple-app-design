@@ -1,0 +1,47 @@
+.statsRow {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.pillLink {
+  text-decoration: none;
+}
+
+.statLink {
+  display: flex;
+  flex: 1;
+  min-width: 200px;
+  text-decoration: none;
+}
+
+.contentRow {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.contentRow > * {
+  flex: 1;
+  min-width: 280px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--fontsize-h3);
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-family);
+  font-size: var(--fontsize-body);
+  color: var(--color-fg);
+}
+
+.rowValue {
+  font-weight: 600;
+}

@@ -1,0 +1,20 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.a {
+  background: #3f6fa8;
+}
+
+.b {
+  background: #a85c8f;
+}
