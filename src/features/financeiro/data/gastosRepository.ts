@@ -52,3 +52,16 @@ export async function quitarGasto(id: string): Promise<void> {
 export async function reabrirGasto(id: string): Promise<void> {
   await apiRequest<Expense>(`/api/v1/expenses/${encodeURIComponent(id)}/reopen`, { method: 'POST' });
 }
+
+/** Records one more paid installment on an isInstallment expense. */
+export async function pagarParcela(id: string): Promise<void> {
+  await apiRequest<Expense>(`/api/v1/expenses/${encodeURIComponent(id)}/pay-installment`, { method: 'POST' });
+}
+
+/** Records a free-form partial payment (reais) on a non-installment expense. */
+export async function pagarParte(id: string, valor: number): Promise<void> {
+  await apiRequest<Expense>(`/api/v1/expenses/${encodeURIComponent(id)}/pay-partial`, {
+    method: 'POST',
+    body: { amount: valor },
+  });
+}

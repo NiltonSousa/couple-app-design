@@ -23,7 +23,7 @@ export type Category = 'travel' | 'gift' | 'food' | 'transport' | 'others';
 
 export type Split = '50-50' | 'individual' | 'loan';
 
-export type ExpenseStatus = 'pending' | 'settled';
+export type ExpenseStatus = 'pending' | 'partial_paid' | 'settled';
 
 export interface Expense {
   id: string;
@@ -40,6 +40,8 @@ export interface Expense {
   totalInstallments: number | null;
   paidInstallments: number | null;
   installmentAmount: number | null;
+  /** Accumulated free-form partial payment, in reais. Only set when !isInstallment. */
+  partialAmountPaid: number | null;
   observation: string;
 }
 
@@ -74,6 +76,9 @@ export interface BalanceItem {
   description: string;
   amount: number;
   half: boolean;
+  isInstallment: boolean;
+  totalInstallments: number | null;
+  paidInstallments: number | null;
 }
 
 export interface CategoryTotal {

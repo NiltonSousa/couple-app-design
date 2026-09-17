@@ -29,7 +29,7 @@ export function HistoricoPage() {
 
   const totalFiltro = filtrados.reduce((sum, g) => sum + g.totalAmount, 0);
   const pendenteFiltro = filtrados
-    .filter((g) => g.status === 'pending')
+    .filter((g) => g.status === 'pending' || g.status === 'partial_paid')
     .reduce((sum, g) => sum + g.totalAmount, 0);
 
   return (
@@ -69,6 +69,7 @@ export function HistoricoPage() {
         >
           <option value={FILTER_ALL}>Todos</option>
           <option value="pending">Pendente</option>
+          <option value="partial_paid">Parcial</option>
           <option value="settled">Quitado</option>
         </SelectField>
       </Card>

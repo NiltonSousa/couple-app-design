@@ -1,6 +1,6 @@
 import styles from './StatusBadge.module.css';
 
-type Status = 'pending' | 'settled';
+type Status = 'pending' | 'partial_paid' | 'settled';
 
 interface StatusBadgeProps {
   status: Status;
@@ -8,6 +8,7 @@ interface StatusBadgeProps {
 
 const LABEL: Record<Status, string> = {
   pending: 'Pendente',
+  partial_paid: 'Parcial',
   settled: 'Quitado',
 };
 

@@ -4,6 +4,7 @@ import { Button } from '../../../design-system/components/Button';
 import { Card } from '../../../design-system/components/Card';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
 import { formatCurrency } from '../../../shared/lib/currency';
+import { PartialPayControl } from '../components/PartialPayControl';
 import { useCasal } from '../hooks/useCasal';
 import { useSaldo } from '../hooks/useSaldo';
 import { useSettleExpense } from '../hooks/useSettleExpense';
@@ -12,15 +13,25 @@ import { formatBalanceItemLabel } from '../lib/saldoItems';
 import styles from './DetalheSaldoPage.module.css';
 
 export function DetalheSaldoPage() {
-  const { acaoError, quitar } = useSettleExpense();
+  const { acaoError, quitar, pagarParcela, pagarParte } = useSettleExpense();
   const { status, summary, error, recarregar } = useSaldo();
   const { labelDe } = useCasal();
 
-  // Quitar changes which expenses compose the balance, and the balance is
-  // computed server-side, so the summary has to be refetched after the
-  // mutation rather than patched locally.
+  // Every paydown action changes which expenses compose the balance, and the
+  // balance is computed server-side, so the summary has to be refetched after
+  // each mutation rather than patched locally.
   const quitarERecarregar = async (id: string) => {
     await quitar(id);
+    recarregar();
+  };
+
+  const pagarParcelaERecarregar = async (id: string) => {
+    await pagarParcela(id);
+    recarregar();
+  };
+
+  const pagarParteERecarregar = async (id: string, valor: number) => {
+    await pagarParte(id, valor);
     recarregar();
   };
 
@@ -64,6 +75,11 @@ export function DetalheSaldoPage() {
               <span>{formatBalanceItemLabel(item)}</span>
               <div className={styles.itemRight}>
                 <span className={styles.itemValue}>{formatCurrency(item.amount)}</span>
+                <PartialPayControl
+                  item={item}
+                  onPagarParcela={() => pagarParcelaERecarregar(item.expenseId)}
+                  onPagarParte={(valor) => pagarParteERecarregar(item.expenseId, valor)}
+                />
                 <Button variant="secondary" onClick={() => quitarERecarregar(item.expenseId)}>
                   Quitar
                 </Button>

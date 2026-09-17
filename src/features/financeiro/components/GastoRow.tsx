@@ -40,7 +40,7 @@ export function GastoRow({ gasto, labelDe, onQuitar, onReabrir }: GastoRowProps)
         <StatusBadge status={gasto.status} />
       </span>
       <span>
-        {gasto.status === 'pending' ? (
+        {gasto.status !== 'settled' ? (
           <Button variant="secondary" onClick={() => onQuitar(gasto.id)}>
             Quitar
           </Button>

@@ -25,6 +25,15 @@
   background: var(--color-warn);
 }
 
+.partial_paid {
+  background: var(--color-warn-soft);
+  color: var(--color-warn-strong);
+}
+
+.partial_paid .dot {
+  background: var(--color-warn);
+}
+
 .settled {
   background: var(--color-accent-soft);
   color: var(--color-accent-strong);
