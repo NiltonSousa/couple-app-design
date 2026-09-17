@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { Button } from '../../../design-system/components/Button';
 import { ApiError } from '../../../shared/lib/apiClient';
 import { InputField, SelectField, TextareaField } from '../../../design-system/components/Field';
 import { RadioPillGroup } from '../../../design-system/components/RadioPillGroup';
+import { centsFromDigits, centsToReais, formatCurrency, removeLastDigit } from '../../../shared/lib/currency';
 import { CATEGORIES, SPLITS } from '../lib/types';
 import type { Category, NewExpense, Person, Split } from '../lib/types';
 import type { MembroCasal } from '../hooks/useCasal';
@@ -21,7 +22,7 @@ export function GastoForm({ membros, euSlug, onSubmit, onCancel }: GastoFormProp
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState<Category>('others');
   const [data, setData] = useState('');
-  const [valorTotal, setValorTotal] = useState('');
+  const [valorCentavos, setValorCentavos] = useState(0);
   const [pagoPor, setPagoPor] = useState<Person>(euSlug);
   const [divisao, setDivisao] = useState<Split>('50-50');
   const [abaterNoSaldo, setAbaterNoSaldo] = useState(true);
@@ -32,9 +33,24 @@ export function GastoForm({ membros, euSlug, onSubmit, onCancel }: GastoFormProp
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  function handleValorKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key >= '0' && e.key <= '9') {
+      e.preventDefault();
+      setValorCentavos((cents) => centsFromDigits(cents, e.key));
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      e.preventDefault();
+      setValorCentavos(removeLastDigit);
+    } else if (
+      !['Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) &&
+      !(e.ctrlKey || e.metaKey)
+    ) {
+      e.preventDefault();
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const valor = Number(valorTotal.replace(',', '.'));
+    const valor = centsToReais(valorCentavos);
     if (!descricao.trim() || !data || !(valor > 0)) {
       setErro('Preencha descrição, data e um valor maior que zero.');
       return;
@@ -55,6 +71,7 @@ export function GastoForm({ membros, euSlug, onSubmit, onCancel }: GastoFormProp
         totalInstallments: parcelado ? Number(totalParcelas) : null,
         paidInstallments: parcelado ? Number(parcelasPagas) : null,
         installmentAmount: parcelado ? valor / Number(totalParcelas || 1) : null,
+        partialAmountPaid: null,
         observation: observacao.trim(),
       });
     } catch (cause) {
@@ -107,10 +124,11 @@ export function GastoForm({ membros, euSlug, onSubmit, onCancel }: GastoFormProp
       <InputField
         label="Valor total"
         id="valorTotal"
-        inputMode="decimal"
+        inputMode="numeric"
         placeholder="R$ 0,00"
-        value={valorTotal}
-        onChange={(e) => setValorTotal(e.target.value)}
+        value={valorCentavos === 0 ? '' : formatCurrency(centsToReais(valorCentavos))}
+        onChange={() => {}}
+        onKeyDown={handleValorKeyDown}
         required
       />
 
