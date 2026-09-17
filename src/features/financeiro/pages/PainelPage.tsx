@@ -48,17 +48,18 @@ export function PainelPage() {
   }
 
   const saldo = summary.balance;
-  const totalDoMes = gastos.reduce((sum, g) => sum + g.totalAmount, 0);
-  const pendentes = gastos.filter((g) => g.status === 'pending');
+  const totalDoMes = summary.grandTotal;
+  const totalPendentes = summary.pendingCount;
   const ultimosLancamentos = [...gastos]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5);
 
+  const totalPorCategoria = new Map(
+    (summary.byCategory ?? []).map((c) => [c.category, c.total]),
+  );
   const porCategoria = CATEGORIES.map((cat) => ({
     label: cat.label,
-    total: gastos
-      .filter((g) => g.category === cat.value)
-      .reduce((sum, g) => sum + g.totalAmount, 0),
+    total: totalPorCategoria.get(cat.value) ?? 0,
   })).filter((c) => c.total > 0);
 
   return (
@@ -89,7 +90,7 @@ export function PainelPage() {
             tone={saldoTone(saldo) === 'danger' ? 'danger' : 'default'}
           />
         </Link>
-        <StatCard label="Lançamentos pendentes" value={String(pendentes.length)} />
+        <StatCard label="Lançamentos pendentes" value={String(totalPendentes)} />
       </div>
 
       <div className={styles.contentRow}>
