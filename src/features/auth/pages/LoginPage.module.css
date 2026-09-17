@@ -1,0 +1,81 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--spacing-lg);
+  background: var(--color-bg);
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.brandName {
+  font-family: var(--font-family);
+  font-size: var(--fontsize-body);
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--fontsize-h1);
+  color: var(--color-fg);
+}
+
+.subtitle {
+  margin: 4px 0 var(--spacing-lg);
+  font-family: var(--font-family);
+  font-size: var(--fontsize-body);
+  color: var(--color-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/*
+  Reserved, always-present live region: announcing into an element that only
+  appears on failure is unreliable across screen readers.
+*/
+.errorSlot:empty {
+  display: none;
+}
+
+.errorText {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  font-family: var(--font-family);
+  font-size: var(--fontsize-body);
+  color: var(--color-danger);
+}

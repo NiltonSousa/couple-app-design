@@ -7,16 +7,31 @@ import { Pill } from '../../../design-system/components/Pill';
 import { StatCard } from '../../../design-system/components/StatCard';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
 import { formatCurrency } from '../../../shared/lib/currency';
+import { useCasal } from '../hooks/useCasal';
 import { useGastos } from '../hooks/useGastos';
-import { computeSaldo } from '../lib/saldo';
+import { useSaldo } from '../hooks/useSaldo';
 import { formatSaldoLabel, saldoTone } from '../lib/formatSaldo';
-import { CATEGORIAS } from '../lib/types';
+import { CATEGORIES } from '../lib/types';
 import styles from './PainelPage.module.css';
 
 export function PainelPage() {
-  const { status, gastos, error } = useGastos();
+  const { status, gastos, error, recarregar } = useGastos();
+  const {
+    status: saldoStatus,
+    summary,
+    error: saldoError,
+    recarregar: recarregarSaldo,
+  } = useSaldo();
+  const { labelDe } = useCasal();
 
-  if (status === 'loading') {
+  // The two requests go out in parallel; the screen only renders once both
+  // have answered, since the saldo pill sits alongside the totals.
+  const recarregarTudo = () => {
+    recarregar();
+    recarregarSaldo();
+  };
+
+  if (status === 'loading' || saldoStatus === 'loading') {
     return (
       <AppShell topbar={<Topbar eyebrow="PAINEL DE CUSTOS" title="Resumo do casal" />}>
         <LoadingState label="Carregando resumo..." />
@@ -24,26 +39,26 @@ export function PainelPage() {
     );
   }
 
-  if (status === 'error') {
+  if (status === 'error' || saldoStatus === 'error' || !summary) {
     return (
       <AppShell topbar={<Topbar eyebrow="PAINEL DE CUSTOS" title="Resumo do casal" />}>
-        <ErrorState message={error ?? 'Algo deu errado.'} />
+        <ErrorState message={error ?? saldoError ?? 'Algo deu errado.'} onRetry={recarregarTudo} />
       </AppShell>
     );
   }
 
-  const saldo = computeSaldo(gastos);
-  const totalDoMes = gastos.reduce((sum, g) => sum + g.valorTotal, 0);
-  const pendentes = gastos.filter((g) => g.status === 'pendente');
+  const saldo = summary.balance;
+  const totalDoMes = gastos.reduce((sum, g) => sum + g.totalAmount, 0);
+  const pendentes = gastos.filter((g) => g.status === 'pending');
   const ultimosLancamentos = [...gastos]
-    .sort((a, b) => b.data.localeCompare(a.data))
+    .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5);
 
-  const porCategoria = CATEGORIAS.map((cat) => ({
+  const porCategoria = CATEGORIES.map((cat) => ({
     label: cat.label,
     total: gastos
-      .filter((g) => g.categoria === cat.value)
-      .reduce((sum, g) => sum + g.valorTotal, 0),
+      .filter((g) => g.category === cat.value)
+      .reduce((sum, g) => sum + g.totalAmount, 0),
   })).filter((c) => c.total > 0);
 
   return (
@@ -55,7 +70,7 @@ export function PainelPage() {
           actions={
             <>
               <Link to="/saldo" className={styles.pillLink}>
-                <Pill tone={saldoTone(saldo)}>{formatSaldoLabel(saldo)}</Pill>
+                <Pill tone={saldoTone(saldo)}>{formatSaldoLabel(saldo, labelDe)}</Pill>
               </Link>
               <Link to="/lancar-gasto">
                 <Button variant="primary">+ Novo gasto</Button>
@@ -70,7 +85,7 @@ export function PainelPage() {
         <Link to="/saldo" className={styles.statLink}>
           <StatCard
             label="Saldo entre vocês"
-            value={formatSaldoLabel(saldo)}
+            value={formatSaldoLabel(saldo, labelDe)}
             tone={saldoTone(saldo) === 'danger' ? 'danger' : 'default'}
           />
         </Link>
@@ -85,8 +100,8 @@ export function PainelPage() {
           ) : (
             ultimosLancamentos.map((g) => (
               <div key={g.id} className={styles.row}>
-                <span>{g.descricao}</span>
-                <span className={styles.rowValue}>{formatCurrency(g.valorTotal)}</span>
+                <span>{g.description}</span>
+                <span className={styles.rowValue}>{formatCurrency(g.totalAmount)}</span>
               </div>
             ))
           )}

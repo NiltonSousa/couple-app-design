@@ -1,58 +1,77 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '../../../design-system/components/Button';
+import { ApiError } from '../../../shared/lib/apiClient';
 import { InputField, SelectField, TextareaField } from '../../../design-system/components/Field';
 import { RadioPillGroup } from '../../../design-system/components/RadioPillGroup';
-import { CATEGORIAS, DIVISOES, PESSOAS } from '../lib/types';
-import type { Categoria, Divisao, NovoGasto, Pessoa } from '../lib/types';
+import { CATEGORIES, SPLITS } from '../lib/types';
+import type { Category, NewExpense, Person, Split } from '../lib/types';
+import type { MembroCasal } from '../hooks/useCasal';
 import styles from './GastoForm.module.css';
 
 interface GastoFormProps {
-  onSubmit: (novo: NovoGasto) => Promise<void>;
+  /** Couple members from the session — the options for "quem pagou". */
+  membros: MembroCasal[];
+  /** Slug of the logged-in user, used as the default payer. */
+  euSlug: Person;
+  onSubmit: (novo: NewExpense) => Promise<void>;
   onCancel: () => void;
 }
 
-export function GastoForm({ onSubmit, onCancel }: GastoFormProps) {
+export function GastoForm({ membros, euSlug, onSubmit, onCancel }: GastoFormProps) {
   const [descricao, setDescricao] = useState('');
-  const [categoria, setCategoria] = useState<Categoria>('outros');
+  const [categoria, setCategoria] = useState<Category>('others');
   const [data, setData] = useState('');
   const [valorTotal, setValorTotal] = useState('');
-  const [pagoPor, setPagoPor] = useState<Pessoa>('nilton');
-  const [divisao, setDivisao] = useState<Divisao>('50-50');
+  const [pagoPor, setPagoPor] = useState<Person>(euSlug);
+  const [divisao, setDivisao] = useState<Split>('50-50');
   const [abaterNoSaldo, setAbaterNoSaldo] = useState(true);
   const [parcelado, setParcelado] = useState(false);
   const [totalParcelas, setTotalParcelas] = useState('2');
   const [parcelasPagas, setParcelasPagas] = useState('0');
   const [observacao, setObservacao] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const valor = Number(valorTotal.replace(',', '.'));
-    if (!descricao.trim() || !data || !(valor > 0)) return;
+    if (!descricao.trim() || !data || !(valor > 0)) {
+      setErro('Preencha descrição, data e um valor maior que zero.');
+      return;
+    }
 
+    setErro(null);
     setSubmitting(true);
     try {
       await onSubmit({
-        descricao: descricao.trim(),
-        categoria,
-        data,
-        valorTotal: valor,
-        pagoPor,
-        divisao,
-        abaterNoSaldo: divisao === 'emprestimo' ? abaterNoSaldo : null,
-        parcelado,
-        totalParcelas: parcelado ? Number(totalParcelas) : null,
-        parcelasPagas: parcelado ? Number(parcelasPagas) : null,
-        valorParcela: parcelado ? valor / Number(totalParcelas || 1) : null,
-        observacao: observacao.trim(),
+        description: descricao.trim(),
+        category: categoria,
+        date: data,
+        totalAmount: valor,
+        paidBy: pagoPor,
+        split: divisao,
+        countsTowardBalance: divisao === 'loan' ? abaterNoSaldo : null,
+        isInstallment: parcelado,
+        totalInstallments: parcelado ? Number(totalParcelas) : null,
+        paidInstallments: parcelado ? Number(parcelasPagas) : null,
+        installmentAmount: parcelado ? valor / Number(totalParcelas || 1) : null,
+        observation: observacao.trim(),
       });
+    } catch (cause) {
+      setErro(
+        cause instanceof ApiError ? cause.message : 'Não foi possível salvar o gasto.',
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <div className={styles.errorSlot} role="alert" aria-live="assertive">
+        {erro && <span className={styles.errorText}>{erro}</span>}
+      </div>
+
       <InputField
         label="Despesa"
         id="descricao"
@@ -67,9 +86,9 @@ export function GastoForm({ onSubmit, onCancel }: GastoFormProps) {
           label="Categoria"
           id="categoria"
           value={categoria}
-          onChange={(e) => setCategoria(e.target.value as Categoria)}
+          onChange={(e) => setCategoria(e.target.value as Category)}
         >
-          {CATEGORIAS.map((c) => (
+          {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
             </option>
@@ -98,7 +117,7 @@ export function GastoForm({ onSubmit, onCancel }: GastoFormProps) {
       <RadioPillGroup
         legend="Quem pagou"
         name="pagoPor"
-        options={PESSOAS}
+        options={membros}
         value={pagoPor}
         onChange={setPagoPor}
       />
@@ -106,12 +125,12 @@ export function GastoForm({ onSubmit, onCancel }: GastoFormProps) {
       <RadioPillGroup
         legend="Divisão"
         name="divisao"
-        options={DIVISOES}
+        options={SPLITS}
         value={divisao}
         onChange={setDivisao}
       />
 
-      {divisao === 'emprestimo' && (
+      {divisao === 'loan' && (
         <label className={styles.checkboxRow}>
           <input
             type="checkbox"

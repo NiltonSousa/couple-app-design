@@ -6,31 +6,31 @@ import { SelectField } from '../../../design-system/components/Field';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
 import { formatCurrency } from '../../../shared/lib/currency';
 import { GastoRow } from '../components/GastoRow';
+import { useCasal } from '../hooks/useCasal';
 import { useGastos } from '../hooks/useGastos';
-import { CATEGORIAS, PESSOAS } from '../lib/types';
-import type { Categoria, Pessoa, StatusGasto } from '../lib/types';
+import { CATEGORIES, FILTER_ALL } from '../lib/types';
+import type { Category, ExpenseStatus, Person } from '../lib/types';
 import styles from './HistoricoPage.module.css';
 
-const ALL = 'todos';
-
 export function HistoricoPage() {
-  const { status, gastos, error, quitar, reabrir } = useGastos();
-  const [categoria, setCategoria] = useState<Categoria | typeof ALL>(ALL);
-  const [pagoPor, setPagoPor] = useState<Pessoa | typeof ALL>(ALL);
-  const [statusFiltro, setStatusFiltro] = useState<StatusGasto | typeof ALL>(ALL);
+  const { status, gastos, error, acaoError, quitar, reabrir, recarregar } = useGastos();
+  const { membros, labelDe } = useCasal();
+  const [categoria, setCategoria] = useState<Category | typeof FILTER_ALL>(FILTER_ALL);
+  const [pagoPor, setPagoPor] = useState<Person | typeof FILTER_ALL>(FILTER_ALL);
+  const [statusFiltro, setStatusFiltro] = useState<ExpenseStatus | typeof FILTER_ALL>(FILTER_ALL);
 
   const filtrados = useMemo(() => {
     return gastos
-      .filter((g) => categoria === ALL || g.categoria === categoria)
-      .filter((g) => pagoPor === ALL || g.pagoPor === pagoPor)
-      .filter((g) => statusFiltro === ALL || g.status === statusFiltro)
-      .sort((a, b) => b.data.localeCompare(a.data));
+      .filter((g) => categoria === FILTER_ALL || g.category === categoria)
+      .filter((g) => pagoPor === FILTER_ALL || g.paidBy === pagoPor)
+      .filter((g) => statusFiltro === FILTER_ALL || g.status === statusFiltro)
+      .sort((a, b) => b.date.localeCompare(a.date));
   }, [gastos, categoria, pagoPor, statusFiltro]);
 
-  const totalFiltro = filtrados.reduce((sum, g) => sum + g.valorTotal, 0);
+  const totalFiltro = filtrados.reduce((sum, g) => sum + g.totalAmount, 0);
   const pendenteFiltro = filtrados
-    .filter((g) => g.status === 'pendente')
-    .reduce((sum, g) => sum + g.valorTotal, 0);
+    .filter((g) => g.status === 'pending')
+    .reduce((sum, g) => sum + g.totalAmount, 0);
 
   return (
     <AppShell topbar={<Topbar eyebrow="EXTRATO" title="Histórico de gastos" />}>
@@ -39,10 +39,10 @@ export function HistoricoPage() {
           label="Categoria"
           id="filtro-categoria"
           value={categoria}
-          onChange={(e) => setCategoria(e.target.value as Categoria | typeof ALL)}
+          onChange={(e) => setCategoria(e.target.value as Category | typeof FILTER_ALL)}
         >
-          <option value={ALL}>Todas</option>
-          {CATEGORIAS.map((c) => (
+          <option value={FILTER_ALL}>Todas</option>
+          {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
             </option>
@@ -52,10 +52,10 @@ export function HistoricoPage() {
           label="Pago por"
           id="filtro-pagopor"
           value={pagoPor}
-          onChange={(e) => setPagoPor(e.target.value as Pessoa | typeof ALL)}
+          onChange={(e) => setPagoPor(e.target.value as Person | typeof FILTER_ALL)}
         >
-          <option value={ALL}>Todos</option>
-          {PESSOAS.map((p) => (
+          <option value={FILTER_ALL}>Todos</option>
+          {membros.map((p) => (
             <option key={p.value} value={p.value}>
               {p.label}
             </option>
@@ -65,17 +65,24 @@ export function HistoricoPage() {
           label="Status"
           id="filtro-status"
           value={statusFiltro}
-          onChange={(e) => setStatusFiltro(e.target.value as StatusGasto | typeof ALL)}
+          onChange={(e) => setStatusFiltro(e.target.value as ExpenseStatus | typeof FILTER_ALL)}
         >
-          <option value={ALL}>Todos</option>
-          <option value="pendente">Pendente</option>
-          <option value="quitado">Quitado</option>
+          <option value={FILTER_ALL}>Todos</option>
+          <option value="pending">Pendente</option>
+          <option value="settled">Quitado</option>
         </SelectField>
       </Card>
 
+      {acaoError && <ErrorState message={acaoError} />}
+
       <Card className={styles.tableCard}>
         {status === 'loading' && <LoadingState label="Carregando histórico..." />}
-        {status === 'error' && <ErrorState message={error ?? 'Algo deu errado.'} />}
+        {status === 'error' && (
+          <ErrorState message={error ?? 'Algo deu errado.'} onRetry={recarregar} />
+        )}
+        {status === 'empty' && (
+          <EmptyState>Nenhum gasto lançado ainda. Comece em "Lançar gasto".</EmptyState>
+        )}
         {status === 'ready' && filtrados.length === 0 && (
           <EmptyState>Nenhum gasto encontrado para esses filtros.</EmptyState>
         )}
@@ -92,7 +99,13 @@ export function HistoricoPage() {
               <span></span>
             </div>
             {filtrados.map((g) => (
-              <GastoRow key={g.id} gasto={g} onQuitar={quitar} onReabrir={reabrir} />
+              <GastoRow
+                key={g.id}
+                gasto={g}
+                labelDe={labelDe}
+                onQuitar={quitar}
+                onReabrir={reabrir}
+              />
             ))}
             <div className={styles.totalRow}>
               <span>Total no filtro</span>

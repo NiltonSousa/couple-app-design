@@ -93,3 +93,25 @@
   font-size: 13px;
   color: var(--color-muted);
 }
+
+.logout {
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: var(--fontsize-meta);
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.logout:hover {
+  color: var(--color-fg);
+  border-color: var(--color-fg);
+}
+
+.logout:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}

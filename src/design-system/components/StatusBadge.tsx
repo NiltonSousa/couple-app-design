@@ -1,14 +1,14 @@
 import styles from './StatusBadge.module.css';
 
-type Status = 'pendente' | 'quitado';
+type Status = 'pending' | 'settled';
 
 interface StatusBadgeProps {
   status: Status;
 }
 
 const LABEL: Record<Status, string> = {
-  pendente: 'Pendente',
-  quitado: 'Quitado',
+  pending: 'Pendente',
+  settled: 'Quitado',
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

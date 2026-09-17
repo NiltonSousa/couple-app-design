@@ -16,20 +16,20 @@
   border-radius: 50%;
 }
 
-.pendente {
+.pending {
   background: var(--color-warn-soft);
   color: var(--color-warn-strong);
 }
 
-.pendente .dot {
+.pending .dot {
   background: var(--color-warn);
 }
 
-.quitado {
+.settled {
   background: var(--color-accent-soft);
   color: var(--color-accent-strong);
 }
 
-.quitado .dot {
+.settled .dot {
   background: var(--color-accent);
 }

@@ -1,15 +1,18 @@
 import { formatCurrency } from '../../../shared/lib/currency';
-import type { Saldo } from './saldo';
+import type { Balance, Person } from './types';
 
-const NAME: Record<'nilton' | 'damaris', string> = { nilton: 'Nilton', damaris: 'Damaris' };
-
-export function formatSaldoLabel(saldo: Saldo): string {
-  if (!saldo.quemDeve || !saldo.quemRecebe || saldo.valor === 0) {
+/**
+ * `labelDe` maps a member slug to a display name and comes from the session
+ * (`useCasal().labelDe`) — names are not hardcoded here, since the backend
+ * owns both the slug and the name.
+ */
+export function formatSaldoLabel(balance: Balance, labelDe: (slug: Person) => string): string {
+  if (!balance.debtor || !balance.creditor || balance.amount === 0) {
     return 'Contas quitadas';
   }
-  return `${NAME[saldo.quemDeve]} deve ${formatCurrency(saldo.valor)}`;
+  return `${labelDe(balance.debtor)} deve ${formatCurrency(balance.amount)}`;
 }
 
-export function saldoTone(saldo: Saldo): 'neutral' | 'danger' {
-  return !saldo.quemDeve || saldo.valor === 0 ? 'neutral' : 'danger';
+export function saldoTone(balance: Balance): 'neutral' | 'danger' {
+  return !balance.debtor || balance.amount === 0 ? 'neutral' : 'danger';
 }

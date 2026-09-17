@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import { Avatar } from '../design-system/components/Avatar';
+import { useAuth } from '../features/auth/hooks/authContext';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Painel', end: true },
@@ -10,6 +11,10 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const { sessao, sair } = useAuth();
+  // Names come from the session, not from a constant — the backend owns them.
+  const membros = sessao?.couple.members ?? [];
+
   return (
     <nav className={styles.sidebar} aria-label="Navegação principal">
       <div className={styles.brand}>
@@ -36,10 +41,19 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className={styles.footer}>
         <div className={styles.avatarStack}>
-          <Avatar initial="N" name="Nilton" tone="a" />
-          <Avatar initial="D" name="Damaris" tone="b" />
+          {membros.map((membro, index) => (
+            <Avatar
+              key={membro.id}
+              initial={membro.name.charAt(0).toUpperCase()}
+              name={membro.name}
+              tone={index === 0 ? 'a' : 'b'}
+            />
+          ))}
         </div>
-        <span className={styles.footerText}>Nilton & Damaris</span>
+        <span className={styles.footerText}>{membros.map((m) => m.name).join(' & ')}</span>
+        <button type="button" className={styles.logout} onClick={sair}>
+          Sair
+        </button>
       </div>
     </nav>
   );

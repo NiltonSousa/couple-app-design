@@ -2,7 +2,8 @@
 
 App de organização financeira do casal (Nilton & Damaris). v1 cobre o
 módulo de custos: painel/resumo, lançamento de gastos, histórico e
-detalhe do saldo agregado. Sem backend — persistência em `localStorage`.
+detalhe do saldo agregado. Persistência via API (`couple-app-backend`),
+autenticação por email + senha.
 
 Design de origem: `docs/superpowers/specs/2026-06-30-nos-dois-financeiro-design.md`
 e `docs/superpowers/plans/2026-06-30-nos-dois-financeiro-desktop.md`
@@ -27,11 +28,16 @@ src/
     financeiro/            # único domínio da v1; próximos módulos (viagens, agenda,
       pages/                 metas) entram como novas pastas em features/, sem tocar aqui
       components/           componentes específicos do domínio (GastoForm, GastoRow...)
-      hooks/                 useGastos — estado assíncrono (loading/error/ready)
-      data/                  gastosRepository — persistência (localStorage por ora)
+      hooks/                 useGastos (loading/error/empty/ready), useCasal
+      data/                  gastosRepository — chamadas à API de gastos
       lib/                   tipos, cálculo de saldo, formatação
+    auth/                  # login, sessão e slugs do casal
+      components/            AuthProvider, RequireAuth
+      pages/                 LoginPage
+      data/                  authRepository, tokenStorage
+      hooks/                 authContext (useAuth)
   shared/                 # utilitários e componentes sem dono de domínio nem de estilo
-                            específico (AsyncState, formatCurrency)
+                            específico (AsyncState, formatCurrency, apiClient)
 ```
 
 **Por que separar `design-system/` de `features/financeiro/`:** os
@@ -50,24 +56,63 @@ e `abaterNoSaldo` só é relevante para empréstimos.
 
 `src/features/financeiro/lib/saldo.ts` (`computeSaldo`) e
 `src/features/financeiro/lib/saldoItems.ts` (`saldoItems`, usada na
-tela "Detalhe do saldo"). `computeSaldo` está com a agregação como TODO
-proposital — ver comentário no arquivo.
+tela "Detalhe do saldo"). `computeSaldo(gastos, membroA, membroB)` recebe
+os slugs do casal vindos da sessão — o cálculo é escrito em termos de
+"quem pagou" e "o outro", sem nome fixo no código.
 
 ## Rodando localmente
+
+Suba o backend (`couple-app-backend`) primeiro — ele escuta em
+`:8080` e já libera CORS para `http://localhost:5173`, a porta padrão
+do Vite, então nenhuma configuração extra é necessária no caso comum.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-## Backend futuro
+Para apontar para outra URL, copie `.env.example` para `.env` e ajuste
+`VITE_API_URL` (sem a variável, o default é `http://localhost:8080`).
 
-`backend-tasks.md` no projeto de design anterior
-(`open-design/.od/projects/2e1f65fa-e376-4e78-89eb-8022d9e4b7ec/backend-tasks.md`)
-documenta o plano de migração para um backend real — os casos de uso e
-o modelo normalizado lá ainda se aplicam, mesmo com o modelo de dado
-atual tendo evoluído (campo `emprestimo`/`abaterNoSaldo` a mais). A camada
-`data/gastosRepository.ts` já usa as mesmas assinaturas de função
-(`loadGastos`, `addGasto`, `quitarGasto`, `reabrirGasto`) previstas
-nesse plano, para que a troca de `localStorage` por `fetch` não exija
-mudanças nos componentes que a consomem.
+Login com o seed de desenvolvimento do backend:
+`nilton@example.com` / `dev12345`.
+
+## Autenticação
+
+- `features/auth/` — `AuthProvider` (único estado global do app: quem
+  está logado), `LoginPage`, `RequireAuth`.
+- O token vai para `localStorage` e é revalidado contra `/auth/me` a
+  cada boot. Qualquer 401 derruba a sessão e leva de volta ao login.
+- **Os slugs do casal (`pagoPor`) vêm de `/auth/me`, não de constante no
+  frontend** — o backend os deriva do nome do usuário. Use `useCasal()`
+  (`features/financeiro/hooks/useCasal.ts`) para obter membros, o slug
+  do usuário logado e o label de cada slug.
+
+## Integração com a API
+
+`shared/lib/apiClient.ts` é o único ponto que fala com a rede: monta a
+base URL, anexa o `Authorization: Bearer`, e converte erro do backend
+(`{error, field?, message}`) em `ApiError` / `UnauthorizedError`.
+
+`data/gastosRepository.ts` manteve as assinaturas
+(`loadGastos`, `addGasto`, `quitarGasto`, `reabrirGasto`), então a troca
+de `localStorage` por `fetch` não exigiu mudança nos componentes que a
+consomem. `valorTotal` trafega em **reais** (ex.: `19.99`); a conversão
+para centavos é interna ao servidor.
+
+Cache/invalidação: cada mutação refaz o GET da lista inteira (sem
+optimistic update) — o servidor é dono dos campos derivados e as listas
+são pequenas.
+
+### Não implementado (deliberadamente)
+
+- **Refresh de token**: o backend não emite refresh token. O token vale
+  24h (`expiresIn: 86400`); expirado, o próximo 401 leva ao login.
+- **SSO (Google)**: decisão explícita — o backend só suporta
+  email + senha por ora.
+- **Filtros server-side**: `GET /gastos` aceita `categoria`, `pagoPor`,
+  `status`, `de`, `ate`, e `loadGastos` já aceita esses parâmetros, mas
+  a `HistoricoPage` continua filtrando no client (o volume não
+  justifica um round trip por mudança de filtro).
+- **`GET /resumo`**: não usado — `computeSaldo`/`saldoItems` no client
+  já cobrem as telas com os dados de `/gastos`.

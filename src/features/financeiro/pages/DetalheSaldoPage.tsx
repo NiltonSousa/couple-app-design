@@ -3,14 +3,26 @@ import { Topbar } from '../../../app/Topbar';
 import { Button } from '../../../design-system/components/Button';
 import { Card } from '../../../design-system/components/Card';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
+import { formatCurrency } from '../../../shared/lib/currency';
+import { useCasal } from '../hooks/useCasal';
 import { useGastos } from '../hooks/useGastos';
-import { computeSaldo } from '../lib/saldo';
+import { useSaldo } from '../hooks/useSaldo';
 import { formatSaldoLabel } from '../lib/formatSaldo';
-import { saldoItems } from '../lib/saldoItems';
+import { formatBalanceItemLabel } from '../lib/saldoItems';
 import styles from './DetalheSaldoPage.module.css';
 
 export function DetalheSaldoPage() {
-  const { status, gastos, error, quitar } = useGastos();
+  const { acaoError, quitar } = useGastos();
+  const { status, summary, error, recarregar } = useSaldo();
+  const { labelDe } = useCasal();
+
+  // Quitar changes which expenses compose the balance, and the balance is
+  // computed server-side, so the summary has to be refetched after the
+  // mutation rather than patched locally.
+  const quitarERecarregar = async (id: string) => {
+    await quitar(id);
+    recarregar();
+  };
 
   if (status === 'loading') {
     return (
@@ -20,37 +32,39 @@ export function DetalheSaldoPage() {
     );
   }
 
-  if (status === 'error') {
+  if (status === 'error' || !summary) {
     return (
       <AppShell topbar={<Topbar eyebrow="SALDO" title="Saldo entre vocês" />}>
-        <ErrorState message={error ?? 'Algo deu errado.'} />
+        <ErrorState message={error ?? 'Algo deu errado.'} onRetry={recarregar} />
       </AppShell>
     );
   }
 
-  const saldo = computeSaldo(gastos);
-  const items = saldoItems(gastos);
-  const quitado = !saldo.quemDeve || saldo.valor === 0;
+  const saldo = summary.balance;
+  const items = summary.balanceItems;
+  const quitado = !saldo.debtor || saldo.amount === 0;
 
   return (
     <AppShell topbar={<Topbar eyebrow="SALDO" title="Saldo entre vocês" />}>
       <Card>
         <span className={styles.summaryLabel}>Saldo atual</span>
         <span className={`${styles.summaryValue} ${quitado ? '' : styles.danger}`}>
-          {formatSaldoLabel(saldo)}
+          {formatSaldoLabel(saldo, labelDe)}
         </span>
       </Card>
+
+      {acaoError && <ErrorState message={acaoError} />}
 
       <Card className={styles.itemsCard}>
         {items.length === 0 ? (
           <EmptyState>Nenhum lançamento pendente compõe o saldo.</EmptyState>
         ) : (
           items.map((item) => (
-            <div key={item.gastoId} className={styles.itemRow}>
-              <span>{item.descricao}</span>
+            <div key={item.expenseId} className={styles.itemRow}>
+              <span>{formatBalanceItemLabel(item)}</span>
               <div className={styles.itemRight}>
-                <span className={styles.itemValue}>{item.valorFormatado}</span>
-                <Button variant="secondary" onClick={() => quitar(item.gastoId)}>
+                <span className={styles.itemValue}>{formatCurrency(item.amount)}</span>
+                <Button variant="secondary" onClick={() => quitarERecarregar(item.expenseId)}>
                   Quitar
                 </Button>
               </div>

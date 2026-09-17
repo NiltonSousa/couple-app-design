@@ -1,52 +1,54 @@
-import type { Gasto, NovoGasto } from '../lib/types';
+import { apiRequest } from '../../../shared/lib/apiClient';
+import type { Expense, NewExpense, Summary } from '../lib/types';
 
 /**
- * Client-only persistence for v1 (per spec: no backend yet).
- * Function signatures intentionally match backend-tasks.md Fase 6 so a future
- * swap to `fetch` calls doesn't require touching call sites.
+ * Expense persistence, backed by the Nós Dois API.
+ *
+ * The wire format matches `Expense`/`NewExpense` field for field — both mirror
+ * the backend DTOs in `internal/httpapi/expense_dto.go` — so there is no
+ * mapping layer here on purpose. In particular `totalAmount` and
+ * `installmentAmount` travel as reais (e.g. 19.99); the cents conversion is
+ * internal to the server.
  */
-const STORAGE_KEY = 'nosDois.gastos.v1';
 
-function readAll(): Gasto[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as Gasto[];
-  } catch {
-    return [];
-  }
+/** Optional server-side filters, mirroring the query params on GET /expenses. */
+export interface ExpensesFilter {
+  category?: string;
+  paidBy?: string;
+  status?: string;
+  /** YYYY-MM-DD */
+  from?: string;
+  /** YYYY-MM-DD */
+  to?: string;
 }
 
-function writeAll(gastos: Gasto[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
+export async function loadGastos(filter?: ExpensesFilter, signal?: AbortSignal): Promise<Expense[]> {
+  return apiRequest<Expense[]>('/api/v1/expenses', { query: { ...filter }, signal });
 }
 
-export async function loadGastos(): Promise<Gasto[]> {
-  return readAll();
+/**
+ * Server-computed summary: the aggregate balance, the items composing it, and
+ * the totals. The balance is deliberately not derived from `loadGastos` on the
+ * client — see the note on `Summary` in `../lib/types`.
+ */
+export async function loadSummary(signal?: AbortSignal): Promise<Summary> {
+  return apiRequest<Summary>('/api/v1/summary', { signal });
 }
 
-export async function addGasto(novo: NovoGasto): Promise<Gasto> {
-  const gasto: Gasto = {
-    ...novo,
-    id: crypto.randomUUID(),
-    status: 'pendente',
-  };
-  const gastos = readAll();
-  gastos.push(gasto);
-  writeAll(gastos);
-  return gasto;
+export async function addGasto(novo: NewExpense): Promise<Expense> {
+  return apiRequest<Expense>('/api/v1/expenses', { method: 'POST', body: novo });
 }
 
+/**
+ * Both transitions answer 200 with the updated expense. The return type stays
+ * `void` because `useGastos` refetches the whole list after a mutation rather
+ * than patching a single row — keeping the response unused makes that
+ * explicit at the call site.
+ */
 export async function quitarGasto(id: string): Promise<void> {
-  const gastos = readAll();
-  const gasto = gastos.find((g) => g.id === id);
-  if (gasto) gasto.status = 'quitado';
-  writeAll(gastos);
+  await apiRequest<Expense>(`/api/v1/expenses/${encodeURIComponent(id)}/settle`, { method: 'POST' });
 }
 
 export async function reabrirGasto(id: string): Promise<void> {
-  const gastos = readAll();
-  const gasto = gastos.find((g) => g.id === id);
-  if (gasto) gasto.status = 'pendente';
-  writeAll(gastos);
+  await apiRequest<Expense>(`/api/v1/expenses/${encodeURIComponent(id)}/reopen`, { method: 'POST' });
 }
