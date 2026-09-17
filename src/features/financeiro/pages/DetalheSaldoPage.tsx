@@ -5,14 +5,14 @@ import { Card } from '../../../design-system/components/Card';
 import { LoadingState, ErrorState, EmptyState } from '../../../shared/components/AsyncState';
 import { formatCurrency } from '../../../shared/lib/currency';
 import { useCasal } from '../hooks/useCasal';
-import { useGastos } from '../hooks/useGastos';
 import { useSaldo } from '../hooks/useSaldo';
+import { useSettleExpense } from '../hooks/useSettleExpense';
 import { formatSaldoLabel } from '../lib/formatSaldo';
 import { formatBalanceItemLabel } from '../lib/saldoItems';
 import styles from './DetalheSaldoPage.module.css';
 
 export function DetalheSaldoPage() {
-  const { acaoError, quitar } = useGastos();
+  const { acaoError, quitar } = useSettleExpense();
   const { status, summary, error, recarregar } = useSaldo();
   const { labelDe } = useCasal();
 
