@@ -35,6 +35,17 @@
   border-bottom: none;
 }
 
+.itemLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemMeta {
+  font-size: var(--fontsize-meta);
+  color: var(--color-muted);
+}
+
 .itemRight {
   display: flex;
   align-items: center;

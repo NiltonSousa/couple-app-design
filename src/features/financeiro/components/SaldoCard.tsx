@@ -5,7 +5,7 @@ import { formatCurrency } from '../../../shared/lib/currency';
 import { useCasal } from '../hooks/useCasal';
 import { useSettleExpense } from '../hooks/useSettleExpense';
 import { formatSaldoLabel } from '../lib/formatSaldo';
-import { formatBalanceItemLabel } from '../lib/saldoItems';
+import { formatBalanceItemLabel, formatInstallmentAmountLabel } from '../lib/saldoItems';
 import type { Summary } from '../lib/types';
 import { PartialPayControl } from './PartialPayControl';
 import styles from './SaldoCard.module.css';
@@ -63,7 +63,12 @@ export function SaldoCard({ summary, onPago }: SaldoCardProps) {
         ) : (
           items.map((item) => (
             <div key={item.expenseId} className={styles.itemRow}>
-              <span>{formatBalanceItemLabel(item)}</span>
+              <span className={styles.itemLeft}>
+                <span>{formatBalanceItemLabel(item)}</span>
+                {formatInstallmentAmountLabel(item) && (
+                  <span className={styles.itemMeta}>{formatInstallmentAmountLabel(item)}</span>
+                )}
+              </span>
               <div className={styles.itemRight}>
                 <span className={styles.itemValue}>{formatCurrency(item.amount)}</span>
                 <PartialPayControl

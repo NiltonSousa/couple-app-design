@@ -1,6 +1,6 @@
 .row {
   display: grid;
-  grid-template-columns: 90px 1.6fr 1fr 0.8fr 1fr 1fr 0.8fr auto;
+  grid-template-columns: 90px 1.6fr 1fr 0.8fr 1fr 1fr 1fr 0.8fr;
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);

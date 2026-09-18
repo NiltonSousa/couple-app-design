@@ -1,4 +1,3 @@
-import { Button } from '../../../design-system/components/Button';
 import { StatusBadge } from '../../../design-system/components/StatusBadge';
 import { Tag } from '../../../design-system/components/Tag';
 import { formatCurrency } from '../../../shared/lib/currency';
@@ -10,8 +9,6 @@ interface GastoRowProps {
   gasto: Expense;
   /** Slug -> display name, from the session (`useCasal().labelDe`). */
   labelDe: (slug: Person) => string;
-  onQuitar: (id: string) => void;
-  onReabrir: (id: string) => void;
 }
 
 function ficaParaCada(gasto: Expense): string {
@@ -22,7 +19,18 @@ function ficaParaCada(gasto: Expense): string {
   return formatCurrency(gasto.totalAmount / 2);
 }
 
-export function GastoRow({ gasto, labelDe, onQuitar, onReabrir }: GastoRowProps) {
+function parcelaLabel(gasto: Expense): string {
+  if (!gasto.isInstallment) return '—';
+  const valor = gasto.installmentAmount !== null ? formatCurrency(gasto.installmentAmount) : '—';
+  const pagas = gasto.paidInstallments ?? 0;
+  return `${valor} (${pagas}/${gasto.totalInstallments ?? '?'})`;
+}
+
+/**
+ * Read-only row: Histórico is a record of what was spent, not a place to act
+ * on it. Quitar/reabrir/pagar live on the Pendências screen instead.
+ */
+export function GastoRow({ gasto, labelDe }: GastoRowProps) {
   const categoriaLabel = CATEGORIES.find((c) => c.value === gasto.category)?.label ?? gasto.category;
   const payerLabel = labelDe(gasto.paidBy);
 
@@ -36,19 +44,9 @@ export function GastoRow({ gasto, labelDe, onQuitar, onReabrir }: GastoRowProps)
       <span>{payerLabel}</span>
       <span className={styles.value}>{formatCurrency(gasto.totalAmount)}</span>
       <span className={styles.value}>{ficaParaCada(gasto)}</span>
+      <span className={styles.value}>{parcelaLabel(gasto)}</span>
       <span>
         <StatusBadge status={gasto.status} />
-      </span>
-      <span>
-        {gasto.status !== 'settled' ? (
-          <Button variant="secondary" onClick={() => onQuitar(gasto.id)}>
-            Quitar
-          </Button>
-        ) : (
-          <Button variant="secondary" onClick={() => onReabrir(gasto.id)}>
-            Reabrir
-          </Button>
-        )}
       </span>
     </div>
   );

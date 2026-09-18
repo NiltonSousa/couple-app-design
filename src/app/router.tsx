@@ -4,6 +4,7 @@ import { LoginPage } from '../features/auth/pages/LoginPage';
 import { PainelPage } from '../features/financeiro/pages/PainelPage';
 import { LancarGastoPage } from '../features/financeiro/pages/LancarGastoPage';
 import { HistoricoPage } from '../features/financeiro/pages/HistoricoPage';
+import { PendenciasPage } from '../features/financeiro/pages/PendenciasPage';
 import type { ReactElement } from 'react';
 
 function protegida(element: ReactElement): ReactElement {
@@ -15,7 +16,7 @@ export const router = createBrowserRouter([
   { path: '/', element: protegida(<PainelPage />) },
   { path: '/lancar-gasto', element: protegida(<LancarGastoPage />) },
   { path: '/historico', element: protegida(<HistoricoPage />) },
-  // /saldo was folded into /historico — the balance is just a different
-  // view of the same expense list (see SaldoCard).
-  { path: '/saldo', element: protegida(<HistoricoPage />) },
+  { path: '/pendencias', element: protegida(<PendenciasPage />) },
+  // Old routes kept working so existing bookmarks/links don't break.
+  { path: '/saldo', element: protegida(<PendenciasPage />) },
 ]);

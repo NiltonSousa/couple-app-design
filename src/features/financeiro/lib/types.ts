@@ -79,6 +79,7 @@ export interface BalanceItem {
   isInstallment: boolean;
   totalInstallments: number | null;
   paidInstallments: number | null;
+  installmentAmount: number | null;
 }
 
 export interface CategoryTotal {
