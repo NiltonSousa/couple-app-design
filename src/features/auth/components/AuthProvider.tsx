@@ -81,6 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
+  // Google's callback page already has a full session from the backend by
+  // the time it calls this — it just needs to be stored the same way a
+  // password login's session is.
+  const entrarComSessao = useCallback((token: string, sessao: Sessao) => {
+    tokenRef.current = token;
+    writeToken(token);
+    setSessao(sessao);
+    setError(null);
+    setStatus('authenticated');
+  }, []);
+
   const revalidar = useCallback(() => {
     if (!tokenRef.current) {
       setStatus('anonymous');
@@ -90,8 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, sessao, error, entrar, sair, revalidar }),
-    [status, sessao, error, entrar, sair, revalidar],
+    () => ({ status, sessao, error, entrar, entrarComSessao, sair, revalidar }),
+    [status, sessao, error, entrar, entrarComSessao, sair, revalidar],
   );
 
   return <AuthContext value={value}>{children}</AuthContext>;

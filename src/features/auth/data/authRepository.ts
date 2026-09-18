@@ -17,3 +17,16 @@ export async function login(email: string, password: string): Promise<LoginRespo
 export async function fetchSessao(signal?: AbortSignal): Promise<Sessao> {
   return apiRequest<Sessao>('/api/v1/auth/me', { signal });
 }
+
+/**
+ * POST /api/v1/auth/google — trades the authorization code and PKCE
+ * verifier from the redirect back from Google for a session, the same way
+ * `login` trades an email/password pair.
+ */
+export async function loginWithGoogle(code: string, codeVerifier: string): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>('/api/v1/auth/google', {
+    method: 'POST',
+    body: { code, codeVerifier },
+    auth: false,
+  });
+}

@@ -79,3 +79,21 @@
   font-size: var(--fontsize-body);
   color: var(--color-danger);
 }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+  font-family: var(--font-family);
+  font-size: var(--fontsize-meta);
+  color: var(--color-muted);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}

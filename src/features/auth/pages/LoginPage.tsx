@@ -5,6 +5,7 @@ import { Card } from '../../../design-system/components/Card';
 import { InputField } from '../../../design-system/components/Field';
 import { ApiError } from '../../../shared/lib/apiClient';
 import { useAuth } from '../hooks/authContext';
+import { startGoogleLogin } from '../lib/googleRedirect';
 import styles from './LoginPage.module.css';
 
 interface LocationState {
@@ -20,6 +21,7 @@ export function LoginPage() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [enviandoGoogle, setEnviandoGoogle] = useState(false);
 
   if (status === 'authenticated') {
     const destino = (location.state as LocationState | null)?.from ?? '/';
@@ -40,6 +42,20 @@ export function LoginPage() {
       );
     } finally {
       setEnviando(false);
+    }
+  }
+
+  async function handleGoogleClick() {
+    if (enviandoGoogle) return;
+
+    setErro(null);
+    setEnviandoGoogle(true);
+    try {
+      const destino = (location.state as LocationState | null)?.from ?? '/';
+      await startGoogleLogin(destino);
+    } catch (cause) {
+      setErro(cause instanceof Error ? cause.message : 'Não foi possível iniciar o login com Google.');
+      setEnviandoGoogle(false);
     }
   }
 
@@ -96,6 +112,19 @@ export function LoginPage() {
             {enviando ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
+
+        <div className={styles.divider} role="separator" aria-label="ou">
+          <span>ou</span>
+        </div>
+
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={enviandoGoogle}
+          onClick={handleGoogleClick}
+        >
+          {enviandoGoogle ? 'Redirecionando...' : 'Entrar com Google'}
+        </Button>
       </Card>
     </main>
   );

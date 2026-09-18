@@ -14,6 +14,8 @@ export interface AuthContextValue {
   /** Set when the boot revalidation failed for a reason other than 401. */
   error: string | null;
   entrar: (email: string, senha: string) => Promise<void>;
+  /** Consumed by the /auth/google/callback page once it has a session from the backend. */
+  entrarComSessao: (token: string, sessao: Sessao) => void;
   sair: () => void;
   /** Retries the boot revalidation after a network failure. */
   revalidar: () => void;
