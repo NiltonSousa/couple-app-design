@@ -19,7 +19,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className={styles.sidebar} aria-label="Navegação principal">
       <div className={styles.brand}>
-        <Logo height={32} />
+        <Logo height={44} />
       </div>
 
       <ul className={styles.navList}>

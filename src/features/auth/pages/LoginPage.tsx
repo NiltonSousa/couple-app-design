@@ -65,7 +65,7 @@ export function LoginPage() {
     <main className={styles.page}>
       <Card className={styles.card}>
         <div className={styles.brand}>
-          <Logo height={48} />
+          <Logo height={96} />
         </div>
 
         <h1 className={styles.title}>Entrar</h1>
