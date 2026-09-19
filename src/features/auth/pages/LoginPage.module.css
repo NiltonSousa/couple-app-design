@@ -16,29 +16,8 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: var(--spacing-lg);
-}
-
-.mark {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--color-accent);
-  color: var(--color-surface);
-  font-family: var(--font-family);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.brandName {
-  font-family: var(--font-family);
-  font-size: var(--fontsize-body);
-  font-weight: 600;
-  color: var(--color-fg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .title {

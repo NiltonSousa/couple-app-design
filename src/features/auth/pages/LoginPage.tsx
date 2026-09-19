@@ -3,6 +3,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../../../design-system/components/Button';
 import { Card } from '../../../design-system/components/Card';
 import { InputField } from '../../../design-system/components/Field';
+import { GoogleButton } from '../../../design-system/components/GoogleButton';
+import { Logo } from '../../../design-system/components/Logo';
 import { ApiError } from '../../../shared/lib/apiClient';
 import { useAuth } from '../hooks/authContext';
 import { startGoogleLogin } from '../lib/googleRedirect';
@@ -63,10 +65,7 @@ export function LoginPage() {
     <main className={styles.page}>
       <Card className={styles.card}>
         <div className={styles.brand}>
-          <span className={styles.mark} aria-hidden="true">
-            ND
-          </span>
-          <span className={styles.brandName}>Nós Dois</span>
+          <Logo height={48} />
         </div>
 
         <h1 className={styles.title}>Entrar</h1>
@@ -117,14 +116,9 @@ export function LoginPage() {
           <span>ou</span>
         </div>
 
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={enviandoGoogle}
-          onClick={handleGoogleClick}
-        >
-          {enviandoGoogle ? 'Redirecionando...' : 'Entrar com Google'}
-        </Button>
+        <GoogleButton disabled={enviandoGoogle} onClick={handleGoogleClick}>
+          {enviandoGoogle ? 'Redirecionando...' : 'Entrar com o Google'}
+        </GoogleButton>
       </Card>
     </main>
   );

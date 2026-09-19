@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import { Avatar } from '../design-system/components/Avatar';
+import { Logo } from '../design-system/components/Logo';
 import { useAuth } from '../features/auth/hooks/authContext';
 
 const NAV_ITEMS = [
@@ -18,10 +19,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className={styles.sidebar} aria-label="Navegação principal">
       <div className={styles.brand}>
-        <span className={styles.mark} aria-hidden="true">
-          ND
-        </span>
-        <span className={styles.brandName}>Nós Dois</span>
+        <Logo height={32} />
       </div>
 
       <ul className={styles.navList}>
