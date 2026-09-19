@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nós Dois — Financeiro</title>
+    <!--
+      GitHub Pages is static hosting: it has no idea about client-side
+      routes like /auth/google/callback, so a hard navigation to one
+      (e.g. Google's OAuth redirect) 404s here instead of reaching
+      React Router. This stashes the real path in sessionStorage and
+      bounces to "/", where main.tsx's restoreRedirectedPath() (see
+      spa-github-pages) puts it back before the router mounts.
+    -->
+    <script>
+      sessionStorage.redirect = location.href;
+    </script>
+    <meta http-equiv="refresh" content="0;URL='/'" />
+  </head>
+  <body></body>
+</html>

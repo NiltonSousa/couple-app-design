@@ -8,6 +8,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Companion to public/404.html (spa-github-pages technique). Must run
+      // as a classic script, before the module below: createBrowserRouter()
+      // reads window.location at import time, and ESM module evaluation
+      // (including this page's own <script type="module">) always happens
+      // after classic scripts, so restoring the path here — but not inside
+      // main.tsx — actually runs in time.
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, '', redirect);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
