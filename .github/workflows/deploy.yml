@@ -33,7 +33,9 @@ jobs:
 
       - run: pnpm build
         env:
-          VITE_API_URL: https://api.newsousa.space/api
+          # apiClient.ts appends paths that already start with /api/v1/...,
+          # so this must be just the origin — a trailing /api here doubles up.
+          VITE_API_URL: https://api.newsousa.space
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
       - name: Add CNAME for custom domain
